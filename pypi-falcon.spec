@@ -4,13 +4,15 @@
 #
 Name     : pypi-falcon
 Version  : 3.1.0
-Release  : 3
+Release  : 4
 URL      : https://files.pythonhosted.org/packages/36/53/4fd90c6c841bc2e4be29ab92c65e5406df9096c421f138bef9d95d43afc9/falcon-3.1.0.tar.gz
 Source0  : https://files.pythonhosted.org/packages/36/53/4fd90c6c841bc2e4be29ab92c65e5406df9096c421f138bef9d95d43afc9/falcon-3.1.0.tar.gz
 Summary  : The ultra-reliable, fast ASGI+WSGI framework for building data plane APIs at scale.
 Group    : Development/Tools
 License  : Apache-2.0
 Requires: pypi-falcon-bin = %{version}-%{release}
+Requires: pypi-falcon-filemap = %{version}-%{release}
+Requires: pypi-falcon-lib = %{version}-%{release}
 Requires: pypi-falcon-license = %{version}-%{release}
 Requires: pypi-falcon-python = %{version}-%{release}
 Requires: pypi-falcon-python3 = %{version}-%{release}
@@ -39,9 +41,28 @@ style="width:100%"
 Summary: bin components for the pypi-falcon package.
 Group: Binaries
 Requires: pypi-falcon-license = %{version}-%{release}
+Requires: pypi-falcon-filemap = %{version}-%{release}
 
 %description bin
 bin components for the pypi-falcon package.
+
+
+%package filemap
+Summary: filemap components for the pypi-falcon package.
+Group: Default
+
+%description filemap
+filemap components for the pypi-falcon package.
+
+
+%package lib
+Summary: lib components for the pypi-falcon package.
+Group: Libraries
+Requires: pypi-falcon-license = %{version}-%{release}
+Requires: pypi-falcon-filemap = %{version}-%{release}
+
+%description lib
+lib components for the pypi-falcon package.
 
 
 %package license
@@ -64,6 +85,7 @@ python components for the pypi-falcon package.
 %package python3
 Summary: python3 components for the pypi-falcon package.
 Group: Default
+Requires: pypi-falcon-filemap = %{version}-%{release}
 Requires: python3-core
 Provides: pypi(falcon)
 Requires: pypi(pecan)
@@ -75,13 +97,16 @@ python3 components for the pypi-falcon package.
 %prep
 %setup -q -n falcon-3.1.0
 cd %{_builddir}/falcon-3.1.0
+pushd ..
+cp -a falcon-3.1.0 buildavx2
+popd
 
 %build
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1649744254
+export SOURCE_DATE_EPOCH=1653060478
 export GCC_IGNORE_WERROR=1
 export AR=gcc-ar
 export RANLIB=gcc-ranlib
@@ -92,6 +117,15 @@ export FFLAGS="$FFLAGS -O3 -ffat-lto-objects -flto=auto "
 export CXXFLAGS="$CXXFLAGS -O3 -ffat-lto-objects -flto=auto "
 export MAKEFLAGS=%{?_smp_mflags}
 python3 -m build --wheel --skip-dependency-check --no-isolation
+pushd ../buildavx2/
+export CFLAGS="$CFLAGS -m64 -march=x86-64-v3 -Wl,-z,x86-64-v3 "
+export CXXFLAGS="$CXXFLAGS -m64 -march=x86-64-v3 -Wl,-z,x86-64-v3 "
+export FFLAGS="$FFLAGS -m64 -march=x86-64-v3 -Wl,-z,x86-64-v3 "
+export FCFLAGS="$FCFLAGS -m64 -march=x86-64-v3 "
+export LDFLAGS="$LDFLAGS -m64 -march=x86-64-v3 "
+python3 -m build --wheel --skip-dependency-check --no-isolation
+
+popd
 
 %install
 export MAKEFLAGS=%{?_smp_mflags}
@@ -102,6 +136,15 @@ pip install --root=%{buildroot} --no-deps --ignore-installed dist/*.whl
 echo ----[ mark ]----
 cat %{buildroot}/usr/lib/python3*/site-packages/*/requires.txt || :
 echo ----[ mark ]----
+pushd ../buildavx2/
+export CFLAGS="$CFLAGS -m64 -march=x86-64-v3 -Wl,-z,x86-64-v3 "
+export CXXFLAGS="$CXXFLAGS -m64 -march=x86-64-v3 -Wl,-z,x86-64-v3 "
+export FFLAGS="$FFLAGS -m64 -march=x86-64-v3 -Wl,-z,x86-64-v3 "
+export FCFLAGS="$FCFLAGS -m64 -march=x86-64-v3 "
+export LDFLAGS="$LDFLAGS -m64 -march=x86-64-v3 "
+pip install --root=%{buildroot}-v3 --no-deps --ignore-installed dist/*.whl
+popd
+/usr/bin/elf-move.py avx2 %{buildroot}-v3 %{buildroot}/usr/share/clear/optimized-elf/ %{buildroot}/usr/share/clear/filemap/filemap-%{name}
 
 %files
 %defattr(-,root,root,-)
@@ -111,6 +154,14 @@ echo ----[ mark ]----
 /usr/bin/falcon-bench
 /usr/bin/falcon-inspect-app
 /usr/bin/falcon-print-routes
+
+%files filemap
+%defattr(-,root,root,-)
+/usr/share/clear/filemap/filemap-pypi-falcon
+
+%files lib
+%defattr(-,root,root,-)
+/usr/share/clear/optimized-elf/other*
 
 %files license
 %defattr(0644,root,root,0755)
