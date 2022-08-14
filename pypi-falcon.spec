@@ -4,7 +4,7 @@
 #
 Name     : pypi-falcon
 Version  : 3.1.0
-Release  : 7
+Release  : 8
 URL      : https://files.pythonhosted.org/packages/36/53/4fd90c6c841bc2e4be29ab92c65e5406df9096c421f138bef9d95d43afc9/falcon-3.1.0.tar.gz
 Source0  : https://files.pythonhosted.org/packages/36/53/4fd90c6c841bc2e4be29ab92c65e5406df9096c421f138bef9d95d43afc9/falcon-3.1.0.tar.gz
 Summary  : The ultra-reliable, fast ASGI+WSGI framework for building data plane APIs at scale.
