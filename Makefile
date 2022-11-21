@@ -1,5 +1,5 @@
 PKG_NAME := pypi-falcon
-URL = https://files.pythonhosted.org/packages/36/53/4fd90c6c841bc2e4be29ab92c65e5406df9096c421f138bef9d95d43afc9/falcon-3.1.0.tar.gz
+URL = https://files.pythonhosted.org/packages/29/bc/c11c9a14bb5b4d18a024ee51da15b793d1c869d151bb4101e324e0d055a8/falcon-3.1.1.tar.gz
 ARCHIVES = 
 
 include ../common/Makefile.common
